@@ -16,6 +16,8 @@ parser.add_argument('-v', '--version', default='v2',
                     help='the controller base version (default "v2")')
 parser.add_argument('-s', '--site_id', default='default',
                     help='the site ID, UniFi >=3.x only (default "default")')
+parser.add_argument('-P', '--port', default=8443, 
+                    help='the port on the unifi controller for the API. Default to 8443.')
 args = parser.parse_args()
 
 if not args.interval:
@@ -45,6 +47,7 @@ def clean_ssid(ssid):
 
 def print_controller_stats(c):
     clients = c.get_clients()
+    print c.host
     putval(c.host + '/unifi_num_sta/ath_nodes', len(clients) )
     clients_radio = collections.Counter(map(lambda x: str(x['radio']), c.get_clients()) )
     putval(c.host + '/unifi_num_sta/num_sta', (clients_radio['ng'], clients_radio['na']) )
@@ -91,8 +94,7 @@ if __name__ == '__main__':
 
         try:
             if not controller: 
-                controller = Controller(args.controller, args.username, args.password, 
-                                        args.version, args.site_id)
+                controller = Controller(args.controller, args.username, args.password, args.port, args.version, args.site_id)
 #                controller = Controller(**args)
             for ap in controller.get_aps():
                 print_controller_stats(controller)
